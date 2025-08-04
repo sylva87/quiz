@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz do Casal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #FF6B8B;
+            --secondary-color: #FF8E9E;
+            --accent-color: #FFD3B6;
+            --background-color: #FFF5F5;
+            --card-color: #FFFFFF;
+            --text-color: #5E2B3F;
+            --text-secondary: #9E6B7E;
+            --error-color: #FF4757;
+            --success-color: #7BED9F;
+            --warning-color: #FFA502;
+            --shadow-light: 0 4px 20px rgba(255, 107, 139, 0.15);
+            --shadow-medium: 0 8px 30px rgba(255, 107, 139, 0.25);
+            --shadow-heavy: 0 15px 40px rgba(255, 107, 139, 0.35);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #FFE5E9 0%, #FFF0F3 50%, #FFE5E9 100%);
+            background-attachment: fixed;
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Elementos decorativos de fundo */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 107, 139, 0.05) 0%, transparent 70%);
+            animation: float 20s ease-in-out infinite;
+            z-index: -1;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            bottom: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 214, 182, 0.08) 0%, transparent 70%);
+            animation: float 25s ease-in-out infinite reverse;
+            z-index: -1;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            box-shadow: var(--shadow-heavy);
+            width: 100%;
+            max-width: 520px;
+            overflow: hidden;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            animation: slideUp 0.8s ease-out;
+        }
+
+        /* Header melhorado */
+        .quiz-header {
+            padding: 35px 30px;
+            text-align: center;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .quiz-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M30 30c0-11.046-8.954-20-20-20s-20 8.954-20 20 8.954 20 20 20 20-8.954 20-20zm0 0c0 11.046 8.954 20 20 20s20-8.954 20-20-8.954-20-20-20-20 8.954-20 20z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+            opacity: 0.1;
+        }
+
+        .quiz-header h1 {
+            font-size: 2.2em;
+            margin-bottom: 8px;
+            font-weight: 700;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .quiz-header h1::before {
+            content: '💕';
+            margin-right: 10px;
+            font-size: 0.8em;
+        }
+
+        .quiz-header p {
+            font-size: 1em;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+            font-weight: 400;
+        }
+
+        /* Barra de progresso melhorada */
+        .progress-container {
+            width: 100%;
+            background: linear-gradient(90deg, #FFE5E9, #FFF0F3);
+            height: 6px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+            width: 0%;
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            box-shadow: 0 0 10px rgba(255, 107, 139, 0.5);
+        }
+
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        /* Seções melhoradas */
+        section {
+            padding: 40px 35px;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        /* Introdução melhorada */
+        .intro {
+            display: flex;
+            text-align: center;
+        }
+
+        .intro p {
+            font-size: 1.1em;
+            line-height: 1.7;
+            margin-bottom: 20px;
+            color: var(--text-secondary);
+        }
+
+        .intro p:first-child {
+            font-size: 1.3em;
+            color: var(--text-color);
+            font-weight: 500;
+            margin-bottom: 15px;
+        }
+
+        /* Quiz section melhorada */
+        .quiz-section {
+            width: 100%;
+        }
+
+        .question-container {
+            margin-bottom: 30px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .question {
+            font-size: 1.5em;
+            margin-bottom: 30px;
+            color: var(--text-color);
+            font-weight: 600;
+            position: relative;
+            display: inline-block;
+            line-height: 1.4;
+            padding: 0 20px;
+        }
+
+        .question::before {
+            content: '❓';
+            position: absolute;
+            left: -10px;
+            top: -5px;
+            font-size: 0.6em;
+            opacity: 0.7;
+        }
+
+        .question::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            border-radius: 2px;
+        }
+
+        /* Input melhorado */
+        .answer-input {
+            width: 100%;
+            padding: 18px 25px;
+            background: linear-gradient(135deg, #FFF9FA, #FFFFFF);
+            border: 2px solid #FFE5E9;
+            border-radius: 15px;
+            color: var(--text-color);
+            font-size: 1.1em;
+            margin-bottom: 20px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            text-align: center;
+            font-weight: 500;
+            box-shadow: var(--shadow-light);
+            position: relative;
+        }
+
+        .answer-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(255, 107, 139, 0.15), var(--shadow-medium);
+            transform: translateY(-2px);
+            background: #FFFFFF;
+        }
+
+        .answer-input::placeholder {
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
+        /* Botões melhorados */
+        .btn {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            padding: 18px 35px;
+            border-radius: 15px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 100%;
+            max-width: 250px;
+            margin-top: 20px;
+            box-shadow: var(--shadow-medium);
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-heavy);
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+        }
+
+        /* Tentativas melhoradas */
+        .attempts {
+            color: var(--warning-color);
+            font-style: italic;
+            margin-top: 20px;
+            text-align: center;
+            font-size: 1em;
+            font-weight: 500;
+            padding: 10px 20px;
+            background: rgba(255, 165, 2, 0.1);
+            border-radius: 10px;
+            border-left: 4px solid var(--warning-color);
+        }
+
+        /* Resultado melhorado */
+        .result-section {
+            text-align: center;
+        }
+
+        .result-section h2 {
+            font-size: 2em;
+            margin-bottom: 25px;
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        .result-box {
+            background: linear-gradient(135deg, #FFF9FA, #FFFFFF);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 30px 0;
+            border-left: 6px solid var(--primary-color);
+            box-shadow: var(--shadow-light);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .result-box::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255, 107, 139, 0.05) 0%, transparent 70%);
+            animation: float 15s ease-in-out infinite;
+        }
+
+        .result-box p {
+            font-size: 1.2em;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .result-box p:first-child {
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        /* Estados melhorados */
+        .error {
+            border-color: var(--error-color) !important;
+            animation: shake 0.6s, errorPulse 0.6s;
+            background: linear-gradient(135deg, #FFE5E5, #FFF0F0) !important;
+        }
+
+        .success {
+            border-color: var(--success-color) !important;
+            animation: successPulse 0.8s;
+            background: linear-gradient(135deg, #E8F5E8, #F0FFF0) !important;
+        }
+
+        /* Animações melhoradas */
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-8px); }
+            20%, 40%, 60%, 80% { transform: translateX(8px); }
+        }
+
+        @keyframes errorPulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 71, 87, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0); }
+        }
+
+        @keyframes successPulse {
+            0% { box-shadow: 0 0 0 0 rgba(123, 237, 159, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(123, 237, 159, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(123, 237, 159, 0); }
+        }
+
+        /* Responsivo melhorado */
+        @media (max-width: 600px) {
+            .container {
+                margin: 10px;
+                border-radius: 20px;
+            }
+
+            section {
+                padding: 30px 25px;
+            }
+
+            .quiz-header {
+                padding: 25px 20px;
+            }
+
+            .quiz-header h1 {
+                font-size: 1.8em;
+            }
+
+            .question {
+                font-size: 1.3em;
+                padding: 0 10px;
+            }
+
+            .answer-input {
+                padding: 16px 20px;
+                font-size: 1em;
+            }
+
+            .btn {
+                max-width: 100%;
+                padding: 16px 30px;
+                font-size: 1em;
+            }
+
+            .result-box {
+                padding: 25px 20px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            body {
+                padding: 10px;
+            }
+
+            section {
+                padding: 25px 20px;
+            }
+
+            .quiz-header {
+                padding: 20px 15px;
+            }
+
+            .quiz-header h1 {
+                font-size: 1.6em;
+            }
+
+            .question {
+                font-size: 1.2em;
+            }
+        }
+
+        /* Efeitos especiais */
+        .floating-hearts {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .heart {
+            position: absolute;
+            color: var(--primary-color);
+            font-size: 20px;
+            opacity: 0.1;
+            animation: floatHeart 10s infinite linear;
+        }
+
+        @keyframes floatHeart {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.1;
+            }
+            90% {
+                opacity: 0.1;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-hearts" id="floating-hearts"></div>
+    
+    <div class="container">
+        <!-- Header -->
+        <div class="quiz-header">
+            <h1>Quiz do Casal</h1>
+            <p>Teste o quanto você me conhece!</p>
+        </div>
+
+        <!-- Barra de Progresso -->
+        <div class="progress-container">
+            <div id="progress-bar" class="progress-bar"></div>
+        </div>
+
+        <!-- Introdução -->
+        <section id="intro-section" class="intro">
+            <p>Responda as perguntas sobre seu namorado e descubra o quanto você conhece ele! (16 Perguntas simples)</p>
+            <p>Se errar uma vez, volta para o início!</p>
+            <button id="start-btn" class="btn">Começar Quiz</button>
+        </section>
+
+        <!-- Quiz -->
+        <section id="quiz-section" class="quiz-section">
+            <div class="question-container">
+                <div id="question" class="question"></div>
+                <input type="text" id="answer-input" class="answer-input" placeholder="Digite sua resposta...">
+                <div id="attempts" class="attempts">Tentativas restantes: 1</div>
+            </div>
+            <button id="submit-btn" class="btn">Enviar Resposta</button>
+        </section>
+
+        <!-- Resultado -->
+        <section id="result-section" class="result-section">
+            <h2>Resultado do Quiz!</h2>
+            <div class="result-box">
+                <p id="final-message"></p>
+                <p id="score-display"></p>
+            </div>
+            <button id="restart-btn" class="btn">Jogar Novamente</button>
+        </section>
+    </div>
+
+    <script>
+        // Perguntas do quiz (personalize com suas respostas)
+        const questions = [
+            {
+                question: "Qual o jogo que mais marcou a minha infância?",
+                correctAnswers: ["minecraft"],
+                userAnswers: []
+            },
+            {
+                question: "Qual o meu sabor de pizza favorito?",
+                correctAnswers: ["quatro queijos", "4 queijos"],
+                userAnswers: []
+            },
+            {
+                question: "Em qual país eu quero morar?",
+                correctAnswers: ["suiça", "suíça"],
+                userAnswers: []
+            },
+            {
+                question: "Qual o seriado que passava na televisão que é o meu favorito? (Duas respostas corretas)",
+                correctAnswers: ["chaves", "todo mundo odeia o cris"],
+                userAnswers: []
+            },
+            {
+                question: "Por volta dos meus 10 anos (Criança), qual desenho era (ainda é) o meu predileto?",
+                correctAnswers: ["apenas um show"],
+                userAnswers: []
+            },
+            {
+                question: "Qual a minha comida favorita? (Sem ser lanche, tipo: Pizza, Hambúrgue, ect)",
+                correctAnswers: ["strogonoff", "frango a milanesa"],
+                userAnswers: []
+            },
+            {
+                question: "Qual o meu carro dos sonhos? (Modelo do carro",
+                correctAnswers: ["skyline r34", "r34", "impala 67"],
+                userAnswers: []
+            },
+            {
+                question: "Qual o tênis que eu sempre quis comprar? (Apenas o modelo do tênis, não a 'empresa')",
+                correctAnswers: ["jordan"],
+                userAnswers: []
+            },
+            {
+                question: "Bolo de Laranja ou Chocolate?",
+                correctAnswers: ["laranja"],
+                userAnswers: []
+            },
+            {
+                question: "Pra mim, qual o melhor super herói? (No geral)",
+                correctAnswers: ["flash"],
+                userAnswers: []
+            },
+            {
+                question: "Meu sabor de sorvete favorito?",
+                correctAnswers: ["flocos"],
+                userAnswers: []
+            },
+            {
+                question: "Qual site de jogos (Biblioteca de jogos) marcou a minha infância?",
+                correctAnswers: ["friv"],
+                userAnswers: []
+            },
+            {
+                question: "Qual foi o seriado que me custaram boas horas? (Eu fiquei mais de 9h todos os dias vendo)",
+                correctAnswers: ["greys anatomy", "grey's anatomy", "grey anatomy"],
+                userAnswers: []
+            },
+            {
+                question: "Pra mim, qual o melhor gênero para filmes?",
+                correctAnswers: ["ficção científica", "ficção", "ficção cientifica"],
+                userAnswers: []
+            },
+            {
+                question: "Qual o filme de romance que você me indicou que eu adorei pra caralho?",
+                correctAnswers: ["a cinco passos de você"],
+                userAnswers: []
+            },
+            {
+                question: "Algo que é o meu sonho conseguir alcançar com você, algo que eu quero te 'dar' e nem o dinheiro pode comprar.",
+                correctAnswers: ["filho", "filha"],
+                userAnswers: []
+            }
+        ];
+
+        // Variáveis de estado
+        let currentQuestion = 0;
+        let attemptsLeft = 1;
+        let score = 0;
+        let consecutiveErrors = 0;
+
+        // Elementos DOM
+        const introSection = document.getElementById('intro-section');
+        const quizSection = document.getElementById('quiz-section');
+        const resultSection = document.getElementById('result-section');
+        const questionElement = document.getElementById('question');
+        const answerInput = document.getElementById('answer-input');
+        const submitBtn = document.getElementById('submit-btn');
+        const attemptsDisplay = document.getElementById('attempts');
+        const startBtn = document.getElementById('start-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const finalMessage = document.getElementById('final-message');
+        const scoreDisplay = document.getElementById('score-display');
+        const progressBar = document.getElementById('progress-bar');
+
+        // Event Listeners
+        startBtn.addEventListener('click', startQuiz);
+        submitBtn.addEventListener('click', checkAnswer);
+        restartBtn.addEventListener('click', restartQuiz);
+        answerInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') checkAnswer();
+        });
+
+        // Função para criar corações flutuantes
+        function createFloatingHearts() {
+            const heartsContainer = document.getElementById('floating-hearts');
+            
+            setInterval(() => {
+                const heart = document.createElement('div');
+                heart.className = 'heart';
+                heart.innerHTML = '💕';
+                heart.style.left = Math.random() * 100 + '%';
+                heart.style.animationDuration = (Math.random() * 3 + 7) + 's';
+                heartsContainer.appendChild(heart);
+
+                setTimeout(() => {
+                    heart.remove();
+                }, 10000);
+            }, 3000);
+        }
+
+        function startQuiz() {
+            introSection.style.display = 'none';
+            quizSection.style.display = 'flex';
+            showQuestion();
+            updateProgressBar();
+            createFloatingHearts();
+        }
+
+        function showQuestion() {
+            if (currentQuestion < questions.length) {
+                questionElement.textContent = questions[currentQuestion].question;
+                answerInput.value = '';
+                answerInput.focus();
+                attemptsLeft = 1;
+                updateAttemptsDisplay();
+            } else {
+                showResults();
+            }
+        }
+
+        function checkAnswer() {
+            const userAnswer = answerInput.value.trim().toLowerCase();
+            if (!userAnswer) {
+                answerInput.classList.add('error');
+                setTimeout(() => answerInput.classList.remove('error'), 600);
+                return;
+            }
+
+            const isCorrect = questions[currentQuestion].correctAnswers.some(
+                correct => userAnswer.includes(correct.toLowerCase())
+            );
+
+            if (isCorrect) {
+                score++;
+                answerInput.classList.add('success');
+                setTimeout(() => {
+                    answerInput.classList.remove('success');
+                    currentQuestion++;
+                    consecutiveErrors = 0;
+                    showQuestion();
+                    updateProgressBar();
+                }, 1000);
+            } else {
+                attemptsLeft--;
+                questions[currentQuestion].userAnswers.push(userAnswer);
+                answerInput.classList.add('error');
+                setTimeout(() => {
+                    answerInput.classList.remove('error');
+                    updateAttemptsDisplay();
+                    if (attemptsLeft <= 0) {
+                        consecutiveErrors++;
+                        if (consecutiveErrors >= 2) {
+                            setTimeout(() => {
+                                resetQuiz();
+                            }, 1000);
+                        }
+                    }
+                }, 800);
+            }
+        }
+
+        function updateAttemptsDisplay() {
+            attemptsDisplay.textContent = `Tentativas restantes: ${attemptsLeft}`;
+            if (attemptsLeft === 1) {
+                attemptsDisplay.style.color = 'var(--warning-color)';
+            }
+        }
+
+        function updateProgressBar() {
+            const progress = (currentQuestion / questions.length) * 100;
+            progressBar.style.width = `${progress}%`;
+        }
+
+        function showResults() {
+            quizSection.style.display = 'none';
+            resultSection.style.display = 'flex';
+            const percentage = (score / questions.length) * 100;
+
+            if (percentage >= 80) {
+                finalMessage.textContent = "🎉 Veri goodi!";
+            } else if (percentage >= 50) {
+                finalMessage.textContent = "Bom, agora você pode receber a sua cartinha.";
+            } else {
+                finalMessage.textContent = "😊 Hmm... talvez precisem se conhecer melhor!";
+            }
+
+            scoreDisplay.textContent = `Você acertou ${score} de ${questions.length} perguntas!`;
+        }
+
+        function resetQuiz() {
+            currentQuestion = 0;
+            attemptsLeft = 1;
+            score = 0;
+            consecutiveErrors = 0;
+            questions.forEach(q => q.userAnswers = []);
+            quizSection.style.display = 'none';
+            introSection.style.display = 'flex';
+            updateProgressBar();
+            updateAttemptsDisplay();
+        }
+
+        function restartQuiz() {
+            resetQuiz();
+            resultSection.style.display = 'none';
+            quizSection.style.display = 'flex';
+            showQuestion();
+        }
+
+        // Inicializar efeitos visuais
+        document.addEventListener('DOMContentLoaded', function() {
+            // Adicionar efeito de entrada suave
+            document.body.style.opacity = '0';
+            setTimeout(() => {
+                document.body.style.transition = 'opacity 0.5s ease-in';
+                document.body.style.opacity = '1';
+            }, 100);
+        });
+    </script>
+</body>
+</html>
